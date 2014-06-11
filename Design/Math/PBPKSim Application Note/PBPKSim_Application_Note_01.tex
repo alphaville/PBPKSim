@@ -39,8 +39,23 @@
 \begin{document}
 \maketitle
 
+\section*{Scope}
+In this short application note we present how 
+one can formulate the offset-free MPC control problem
+as a quadratic optimisation problem which can be solved
+with any solver in MATLAB, Python or other languages. 
 
 \section*{Formulation of the problem}
+
+\subsection*{Notation}
+Let $\N$, $\Re$, $\Re^n$, $\Re^{n\times m}$ denote the set
+of non-negative integers, the set of real number, the set of $n$-vectors,
+and the set of $n$-by-$m$ matrices. Let $\N_{[k_1, k_2]}$ denote the
+set of non-negative integers that are between $k_1$ and $k_2$.
+We denote by $I_m$ the unit matrix of size $m$-by-$m$; the simpler
+notation $I$ will sometimes be used without explicitly stating the
+dimension of the matrix.
+
 \subsection*{General formulation}
 The cost function is defined as:
 \begin{align}\label{eq:cost-definition}
@@ -197,8 +212,8 @@ V_N^\star = \min_{z} \frac{1}{2}z'\Theta z + q'z,
 \end{align}
 subject to the constraints:
 \begin{align}
-0 \leq z \leq z_{\max}\label{eq:z-bound}\\
-Kz = L.
+0 &\leq z \leq z_{\max}\label{eq:z-bound}\\
+Kz &= L.
 \end{align}
 \end{subequations}
 
@@ -214,13 +229,75 @@ represented, in terms of $z$, in the form:
 \end{align}
 where
 \begin{equation}
-\Phi=\left[\begin{array}{ccccc}
+\Phi=\left[\begin{array}{cccccc}
 H & 0\\
 & G  & H\\
 && G & H \\
-&&& \ddots & \ddots
-\end{array}\right]
+&&& \ddots & \ddots\\
+&&&& G & H
+\end{array}\right],
 \end{equation}
+and
+\begin{align}
+\phi=\left[ \begin{array}{c}
+M-Gc_0\\
+M\\
+\vdots\\
+M
+\end{array}\right].
+\end{align}
+
+
+
+
+
+\subsection*{Partial constraints}
+Constraints may not be necessarily imposed on all concentrations but
+only on some $c^j$ for $j\in J$, where $c^j$ stands for the $j$-th element of the 
+vector $c\in\Re^n$. Let $J=\{j_1,j_2,\ldots, j_l\}$ with $l\leq n$. Let
+\begin{equation}
+\Delta_J = \left[\begin{array}{c}
+e(j_1)'\\
+e(j_2)'\\
+\vdots\\
+e(j_k)'
+\end{array}\right],
+\end{equation}
+where $e(j)$ is a vector of $\Re^n$ whose $j$-th entry
+is $1$ and all other entries are equal to $0$. The constraints
+on $c$ are then written as:
+\begin{subequations}
+\begin{align}
+\Delta_J c_k &\leq c^J_{\max}, \forall k\in\N_{[0,N]},\\
+0 &\leq c_k, \forall k\in\N_{[0,N]},
+\end{align}
+\end{subequations}
+where $c^J_{\max}\in\Re^{l}$ stands for the bounds on $c^{j}$ with $j\in J$. 
+In terms of the variable $z$, the state and input bounds~\eqref{eq:state-bounds} and~\eqref{eq:input-bounds}
+can be written as $\Xi_J z \leq \xi_J$, where
+\begin{subequations}
+\begin{align}
+\Xi_J=\left[\begin{array}{ccccc}
+I_m\\
+&\Delta_J\\
+&&\ddots\\
+&&&I_m\\
+&&&&\Delta_J
+\end{array}\right],
+\end{align}
+and
+\begin{align}
+\xi_J = \left[\begin{array}{c}
+u_{\max}\\
+c^J_{\max}\\
+u_{\max}\\
+c^J_{\max}\\
+\vdots\\
+u_{\max}\\
+c^J_{\max}
+\end{array}\right].
+\end{align}
+\end{subequations}
 
 
 \bibliographystyle{ieeetr}
