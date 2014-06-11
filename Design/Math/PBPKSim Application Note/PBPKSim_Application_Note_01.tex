@@ -1,0 +1,229 @@
+\documentclass[12pt]{scrartcl}
+
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+
+\newcommand{\phicl}{\varphi_{\mathrm{cl}}}                                                          
+\newcommand{\N}{\mathbb{N}} 
+\newcommand{\x}{\mathbf{x}} 
+\newcommand{\conv}{\operatorname{co}}
+\newcommand{\cone}{\operatorname{cone}}
+\newcommand{\Pre}{\operatorname{Pre}}  
+\newcommand{\dom}{\operatorname{dom}} 
+\newcommand{\proj}{\operatorname{proj}} 
+\newcommand{\diag}{\operatorname{diag}} 
+\newcommand{\cl}{\operatorname{cl}}
+\newcommand{\interior}{\operatorname{int}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\X}{{X}}
+\newcommand{\Us}{{U}}
+\newcommand{\Ss}{\mathcal{S}}
+\newcommand{\Y}{{Y}}
+\newcommand{\Z}{{Z}}
+\renewcommand{\Re}{\mathbb{R}}
+\newcommand{\dfn}{\mathrel{\mathop:}=} 
+\newcommand{\seq}[2]{\left\langle#1\right\rangle_{#2\in\mathbb{N}}}
+\newcommand{\smallmat}[1]{
+  \left[ \begin{smallmatrix}#1 \end{smallmatrix} \right]}
+\newcommand{\ie}{\textit{i.e.}}
+
+\newcommand{\bcj}{\bar{c}_j}
+\newcommand{\buj}{\bar{u}_j}
+
+
+\title{Formulation of the MPC problem as a QP problem}
+\subtitle{PBPKSim Application Note}
+\author{Pantelis~Sopasakis}
+        
+\begin{document}
+\maketitle
+
+
+\section*{Formulation of the problem}
+\subsection*{General formulation}
+The cost function is defined as:
+\begin{align}\label{eq:cost-definition}
+V_N(\pi, \hat{c}_j, \hat{d}_j) = \|c_N - \bar{c}_j\|_P^2 + \sum_{k=0}^{N-1}\left( 
+\|c_k-\bar{c}_j\|_Q^2+\|u_k-\bar{u}_j\|_R^2
+\right),
+\end{align}
+where $\|\cdot\|_Q$ is the $Q$-(semi)norm defined as $\|c\|_Q^2=c'Qc$ for 
+a positive (semi)definite matrix $Q$, $c_k\in\Re^n$ is the (predicted) state of the system,
+$u_k\in\Re^m$ is a (predicted) input, $\bar{c}_j$ and $\bar{u}_j$ are reference values
+computed as explained in~\cite[Eq. (33)]{SopPatSar14} and $P$ is a 
+properly calculated terminal cost matrix~\cite[Eq. (32)]{SopPatSar14}.
+In~\eqref{eq:cost-definition}, $\pi$ stands for a sequence of inputs
+$\pi=\{u_i\}_{i=0}^{N-1}$ of length $N$.
+
+We assume that a constant additive disturbance $d_k\in\Re^{n_d}$ acts on the system,
+where $n_d$ is less than of equal to the number of measured outputs of the system.
+The system dynamics is described by:
+\begin{align}
+V_N^\star(\hat{c}_j, \hat{d}_j) = \min_{\pi=\{u_i\}_{i=0}^{N-1}}V_N(\pi, \hat{c}_j, \hat{d}_j),
+\end{align}
+subject to the constraints:
+\begin{subequations}
+\begin{align}
+c_{k+1} = &A c_k + Bu_k + B_d d_k, \forall k\in\N_{[0,N-1]},\label{eq:state-update}\\
+d_{k+1} &= d_k, \forall k\in\N_{[0,N-1]},\label{eq:disturbance-dynamics}\\
+Gc_k + Hu_k &\leq M, \forall k\in\N_{[0,N-1]},\label{eq:mixed-state-input-constraints}\\
+G_fc_N &\leq M_f,\label{eq:mixed-state-input-constraints-terminal}\\
+c_0 &= \hat{c}_j,\\
+d_0 &= \hat{d}_j,
+\end{align}
+
+but where the mixed state-input constraints of~\eqref{eq:mixed-state-input-constraints}
+and the terminal constraints~\eqref{eq:mixed-state-input-constraints-terminal}
+can sometimes be simplified and written in the form:
+\begin{align}
+0 \leq &c_k \leq c_{\max}, \forall  k\in\N_{[1,N]}\label{eq:state-bounds},\\
+0 \leq &u_k \leq u_{\max}, \forall  k\in\N_{[0,N-1]}\label{eq:input-bounds}.
+\end{align}
+\end{subequations}
+Let us define the optimisation variable $z$ as follows:
+\begin{align}
+z=\left( u_0, c_1, u_1, c_2, \ldots, c_{N-1}, u_{N-1}, c_{N}\right)',
+\end{align}
+where $z\in\Re^{N(n+m)}$. Then, the cost function in~\eqref{eq:cost-definition}
+can be written as follows:
+\begin{align*}
+V_N &{=} (c_N-\bcj)'P(c_N-\bcj) {+} \sum_{k=0}^{N-1}(c_k-\bcj)'Q(c_k-\bcj){+} 
+		(u_k-\buj)'R(u_k-\buj)\\
+		&= c_N' P c_N + \bcj' P \bcj - \bcj' P c_N - c_N' P \bcj +\\
+		  &\qquad + \sum_{k=0}^{N-1} c_k' Q c_k + \bcj' Q c_k + u_k' R u_k + \buj' R \buj - 2\buj R u_k\\
+		&=\textcolor{red}{c_N' P c_N + \sum_{k=0}^{N-1} \left[ \begin{array}{cc}c_k' & u_k'\end{array}\right]
+\left[ \begin{array}{cc}
+Q & 0\\0 & R
+\end{array}\right]
+\left[ \begin{array}{c}
+c_k\\
+u_k
+\end{array}\right]}+\\
+&\qquad+\textcolor{blue}{\left( 
+\sum_{k=0}^{N-1}\left[ \begin{array}{cc}
+-2\bcj Q & -2\buj R
+\end{array}\right]\left[ 
+\begin{array}{c}
+c_k\\u_k
+\end{array}\right]
+\right)}+\textcolor{magenta}{\gamma},
+\end{align*}
+where the terms in red are quadratic terms, the blue ones are linear and
+there is also a constant term $\gamma$ which we shall omit.
+
+The cost function $V_N$ can be now written as a function of $z$ in the following
+form:
+\begin{align}
+V_N(z) = \frac{1}{2}z' \Theta z + q'z,
+\end{align}
+where $\Theta\in\Re^{N(n+m)\times N(n+m)}$ is the following square positive definite matrix:
+\begin{align}
+\Theta=2\left[
+\begin{array}{cccccccc}
+R\\
+&Q\\
+&&R\\
+&&&Q\\
+&&&&\ddots\\
+&&&&&Q\\
+&&&&&&R\\
+&&&&&&&P
+\end{array}\right],
+\end{align}
+and $q\in \Re^{N(n+m)}$ is:
+\begin{align}
+q=-2\left[
+\begin{array}{c}
+\buj' R\\
+\bcj' Q\\
+\vdots\\
+\buj' R\\
+\bcj' Q\\
+\bcj' P
+\end{array}\right],
+\end{align}
+If we only have constraints of the simple form~\eqref{eq:state-bounds} and~\eqref{eq:input-bounds},
+then, the constraints on $z$ are also bounds of the form $0\leq z \leq z_{\max}$, where
+$z_{\max}\in\Re^{N(n+m)}$ is the vector:
+\begin{align}
+z_{\max}=\left[
+\begin{array}{c}
+u_{\max}\\
+c_{\max}\\
+\vdots\\
+u_{\max}\\
+c_{\max}\\
+\end{array}\right].
+\end{align}
+Given that the disturbance dynamics is~\eqref{eq:disturbance-dynamics}, the
+state-update equation~\eqref{eq:state-update} can be written as follows:
+\begin{align*}
+c_1 - Bu_0 &= B_d d_0 + Ac_0,\\
+c_2 - Ac_1 - Bu_1 &= B_d d_0,\\
+c_3 - Ac_2 - Bu_2 &= B_d d_0,\\
+&\ \ \vdots\\
+c_N - Ac_{N-1}-Bu_{N-1} &= B_d d_0,
+\end{align*}
+which is compactly written in the matrix form $Kz = L$ as follows:
+\begin{align}
+K=\left[\begin{array}{ccccccc}
+-B & I\\
+& -A & -B &I\\
+&& -A & -B &I\\
+&&&\ddots & \ddots & \ddots\\
+&&&&-A&-B&I
+\end{array}\right],
+\end{align}
+and
+\begin{align}
+L=\left[
+\begin{array}{c}
+B_d d_0 + Ac_0\\
+B_d d_0\\
+B_d d_0\\
+\vdots\\
+B_d d_0
+\end{array}\right],
+\end{align}
+where, of course $d_0=\hat{d}_j$ and $c_0=\hat{c}_j$, that is
+$d_0$ is the current disturbance estimate and $c_0$ is the current
+concentration (state) estimate.
+
+Now, overall the problem has been formulated as a convex QP as follows:
+\begin{subequations}
+\begin{align}
+V_N^\star = \min_{z} \frac{1}{2}z'\Theta z + q'z,
+\end{align}
+subject to the constraints:
+\begin{align}
+0 \leq z \leq z_{\max}\label{eq:z-bound}\\
+Kz = L.
+\end{align}
+\end{subequations}
+
+\subsection*{Mixed state-input constraints}
+There are cases where we need to impose mixed state-input constraints 
+as in~\eqref{eq:mixed-state-input-constraints} and/or
+terminal constraints as in~\eqref{eq:mixed-state-input-constraints-terminal}.
+These constraints may be imposed additionally to the bounds~\eqref{eq:z-bound}.
+Constraints of the form~\eqref{eq:mixed-state-input-constraints} can be 
+represented, in terms of $z$, in the form:
+\begin{align}
+\Phi z \leq \phi,
+\end{align}
+where
+\begin{equation}
+\Phi=\left[\begin{array}{ccccc}
+H & 0\\
+& G  & H\\
+&& G & H \\
+&&& \ddots & \ddots
+\end{array}\right]
+\end{equation}
+
+
+\bibliographystyle{ieeetr}
+\bibliography{appl-note-bib}
+
+\end{document}
