@@ -123,6 +123,7 @@ c_k\\
 u_k
 \end{array}\right]}+\\
 &\qquad+\textcolor{blue}{\left( 
+-2\bcj' P c_N + 
 \sum_{k=0}^{N-1}\left[ \begin{array}{cc}
 -2\bcj Q & -2\buj R
 \end{array}\right]\left[ 
@@ -159,12 +160,15 @@ q=-2\left[
 \begin{array}{c}
 \buj' R\\
 \bcj' Q\\
-\vdots\\
 \buj' R\\
 \bcj' Q\\
+\vdots\\
+\buj' Q\\
+\bcj' R\\
 \bcj' P
-\end{array}\right],
+\end{array}\right].
 \end{align}
+
 If we only have constraints of the simple form~\eqref{eq:state-bounds} and~\eqref{eq:input-bounds},
 then, the constraints on $z$ are also bounds of the form $0\leq z \leq z_{\max}$, where
 $z_{\max}\in\Re^{N(n+m)}$ is the vector:
