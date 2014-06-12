@@ -189,7 +189,8 @@ u_{\max}\\
 c_{\max}\\
 \end{array}\right].
 \end{align}
-Given that the disturbance dynamics is~\eqref{eq:disturbance-dynamics}, the
+Given that the disturbance dynamics is~\eqref{eq:disturbance-dynamics}, 
+it is $d_k=d_0=\hat{d}_j$ for all $k\in \N_{[0,N-1]}$ and the
 state-update equation~\eqref{eq:state-update} can be written as follows:
 \begin{align*}
 c_1 - Bu_0 &= B_d d_0 + Ac_0,\\
@@ -354,6 +355,10 @@ P_{k+1}=A'P_kA - A'P_kB(B'P_kB+R)^{-1}B'P_kA+Q,
 with $P_0=I$. Algorithm~\eqref{eq:ricatti-algorithm} terminates if the
 norm of two successive iterates $\|P_{\nu}-P_{\nu-1}\|$ is smaller than 
 a given desired (small) tolerance. 
+
+
+
+
 \bibliographystyle{ieeetr}
 \bibliography{appl-note-bib}
 
