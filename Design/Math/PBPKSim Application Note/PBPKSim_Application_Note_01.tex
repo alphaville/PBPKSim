@@ -1,4 +1,4 @@
-\documentclass[12pt]{scrartcl}
+\documentclass[12pt]{report}
 
 \usepackage[cmex10]{amsmath}
 \usepackage{amssymb}
@@ -30,6 +30,14 @@
 
 \newcommand{\bcj}{\bar{c}_j}
 \newcommand{\buj}{\bar{u}_j}
+
+\usepackage{titling}
+\newcommand{\subtitle}[1]{%
+  \posttitle{%
+    \par\end{center}
+    \begin{center}\large#1\end{center}
+    \vskip0.5em}%
+}
 
 
 \title{Formulation of the MPC problem as a QP problem}
@@ -168,7 +176,6 @@ q=-2\left[
 \bcj' P
 \end{array}\right].
 \end{align}
-
 If we only have constraints of the simple form~\eqref{eq:state-bounds} and~\eqref{eq:input-bounds},
 then, the constraints on $z$ are also bounds of the form $0\leq z \leq z_{\max}$, where
 $z_{\max}\in\Re^{N(n+m)}$ is the vector:
@@ -312,6 +319,41 @@ c^J_{\max}
 \end{subequations}
 
 
+
+
+\subsection*{Other details}
+The vectors $\bcj$ and $\buj$ are computed online by
+the following equation:
+\begin{align}
+\left[\begin{array}{cc}
+A-I & B\\ C & 0
+\end{array}\right]
+\left[\begin{array}{c}
+\bcj\\ 
+\buj
+\end{array}\right]=\left[\begin{array}{c}
+-B_d \hat{d}_j\\
+r_j - C_d \hat{d}_j
+\end{array}\right],
+\end{align}
+where $\hat{d}_j$ is the disturbance estimate (which comes from
+the augmented state observer~\cite[Eq. (24)]{SopPatSar14}),
+and $r_j$ is the desired set-point. Hence, a linear system
+has to be solved at every time instant.
+
+Matrix $P$ in the definition of $V_N$ is a matrix which solves
+the following Ricatti-type algebraic equation:
+\begin{align}\label{eq:ricatti-equation}
+P=A'PA - A'PB(B'PB+R)^{-1}B'PA+Q.
+\end{align}
+The solution of~\eqref{eq:ricatti-equation} is unique and can be 
+found through the iterative procedure:
+\begin{align}\label{eq:ricatti-algorithm}
+P_{k+1}=A'P_kA - A'P_kB(B'P_kB+R)^{-1}B'P_kA+Q,
+\end{align}
+with $P_0=I$. Algorithm~\eqref{eq:ricatti-algorithm} terminates if the
+norm of two successive iterates $\|P_{\nu}-P_{\nu-1}\|$ is smaller than 
+a given desired (small) tolerance. 
 \bibliographystyle{ieeetr}
 \bibliography{appl-note-bib}
 
