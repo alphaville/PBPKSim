@@ -65,11 +65,13 @@ V_N(\pi, \hat{c}_j, \hat{d}_j) = \|c_N - \bar{c}_j\|_P^2 + \sum_{k=0}^{N-1}\left
 \end{align}
 where $\|\cdot\|_Q$ is the $Q$-(semi)norm defined as $\|c\|_Q^2=c'Qc$ for 
 a positive (semi)definite matrix $Q$, $c_k\in\Re^n$ is the (predicted) state of the system,
-$u_k\in\Re^m$ is a (predicted) input, $\bar{c}_j$ and $\bar{u}_j$ are reference values
+$u_k\in\Re^m$ is a (predicted) input, $\bcj\in\Re^n$ and $\buj\in\Re^m$ are reference values
 computed as explained in~\cite[Eq. (33)]{SopPatSar14} and $P$ is a 
 properly calculated terminal cost matrix~\cite[Eq. (32)]{SopPatSar14}.
 In~\eqref{eq:cost-definition}, $\pi$ stands for a sequence of inputs
-$\pi=\{u_i\}_{i=0}^{N-1}$ of length $N$.
+$\pi=\{u_i\}_{i=0}^{N-1}$ of length $N$, $Q\in\Re^{n\times n}$
+is a positive semidefinite matrix, $R\in\Re^{m\times m}$ is a 
+positive definite matrix and $P\in\Re^{n\times n}$.
 
 We assume that a constant additive disturbance $d_k\in\Re^{n_d}$ acts on the system,
 where $n_d$ is less than of equal to the number of measured outputs of the system.
@@ -87,7 +89,6 @@ G_fc_N &\leq M_f,\label{eq:mixed-state-input-constraints-terminal}\\
 c_0 &= \hat{c}_j,\\
 d_0 &= \hat{d}_j,
 \end{align}
-
 but where the mixed state-input constraints of~\eqref{eq:mixed-state-input-constraints}
 and the terminal constraints~\eqref{eq:mixed-state-input-constraints-terminal}
 can sometimes be simplified and written in the form:
@@ -96,6 +97,12 @@ can sometimes be simplified and written in the form:
 0 \leq &u_k \leq u_{\max}, \forall  k\in\N_{[0,N-1]}\label{eq:input-bounds}.
 \end{align}
 \end{subequations}
+In the above equations $G\in \Re^{n_c\times n}$, $H\in\Re^{n_c\times m}$
+and $M\in\Re^{n_c}$, where $n_c\in\N$ is the number of mixed state-input
+constraints. Also, $G_f\in \Re^{n_f\times n}$ and $M_f\in\Re^{n_f}$,
+where $n_f\in\N$ is the number of terminal constraints. What is more, it
+is $A\in\Re^{n\times n}$, $B\in\Re^{n\times m}$ and $B_d\in\Re^{n\times n_d}$.
+
 Let us define the optimisation variable $z$ as follows:
 \begin{align}
 z=\left( u_0, c_1, u_1, c_2, \ldots, c_{N-1}, u_{N-1}, c_{N}\right)',
@@ -180,7 +187,7 @@ c_3 - Ac_2 - Bu_2 &= B_d d_0,\\
 &\ \ \vdots\\
 c_N - Ac_{N-1}-Bu_{N-1} &= B_d d_0,
 \end{align*}
-which is compactly written in the matrix form $Kz = L$ as follows:
+which is compactly written in the matrix form $Kz = L$ where $K\in\Re^{Nn\times N(n+m)}$ is:
 \begin{align}
 K=\left[\begin{array}{ccccccc}
 -B & I\\
@@ -190,7 +197,7 @@ K=\left[\begin{array}{ccccccc}
 &&&&-A&-B&I
 \end{array}\right],
 \end{align}
-and
+and $L\in \Re^{Nn}$ is
 \begin{align}
 L=\left[
 \begin{array}{c}
@@ -227,7 +234,7 @@ represented, in terms of $z$, in the form:
 \begin{align}
 \Phi z \leq \phi,
 \end{align}
-where
+where $\Phi\in\Re^{Nn_c\times N(n+m)}$ is
 \begin{equation}
 \Phi=\left[\begin{array}{cccccc}
 H & 0\\
@@ -237,7 +244,7 @@ H & 0\\
 &&&& G & H
 \end{array}\right],
 \end{equation}
-and
+and $\phi\in\Re^{Nn_c}$ is
 \begin{align}
 \phi=\left[ \begin{array}{c}
 M-Gc_0\\
@@ -254,7 +261,8 @@ M
 \subsection*{Partial constraints}
 Constraints may not be necessarily imposed on all concentrations but
 only on some $c^j$ for $j\in J$, where $c^j$ stands for the $j$-th element of the 
-vector $c\in\Re^n$. Let $J=\{j_1,j_2,\ldots, j_l\}$ with $l\leq n$. Let
+vector $c\in\Re^n$. Let $J=\{j_1,j_2,\ldots, j_l\}$ with $l\leq n$. 
+Let us define the matrix $\Delta_J\in\Re^{l\times n}$ as
 \begin{equation}
 \Delta_J = \left[\begin{array}{c}
 e(j_1)'\\
@@ -285,7 +293,7 @@ I_m\\
 &&&&\Delta_J
 \end{array}\right],
 \end{align}
-and
+and $\xi_J\in\Re^{N(m+l)}$ is
 \begin{align}
 \xi_J = \left[\begin{array}{c}
 u_{\max}\\
